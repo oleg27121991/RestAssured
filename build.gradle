@@ -1,0 +1,70 @@
+plugins {
+    id 'java'
+    id('io.qameta.allure') version '2.11.2'
+}
+
+group "by.veremeioleg"
+version "1.0-SNAPSHOT"
+
+def     slf4jVersion = "2.0.9",
+        junitVersion = "5.10.1",
+        selenideVersion = "7.0.4",
+        javafakerVersion = "1.0.2",
+        mySQLVersion = "8.0.33",
+        jschVersion = "0.1.55",
+        springVersion = "6.1.2",
+        allureVersion = "2.24.0",
+        cryptVersion = "8.9.2",
+        ownerVersion = "1.0.12",
+        assertjCoreVersion = "3.23.1",
+        webdrivermanagerVersion = "5.6.3",
+        restAssuredVersion = "5.4.0"
+
+allure {
+    report {
+        version.set(allureVersion)
+    }
+    adapter {
+        aspectjWeaver.set(true)
+        frameworks {
+            junit5 {
+                adapterVersion.set(allureVersion)
+            }
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation(
+            "org.junit.jupiter:junit-jupiter:$junitVersion",
+            "com.codeborne:selenide:$selenideVersion",
+            "com.github.javafaker:javafaker:$javafakerVersion",
+            "mysql:mysql-connector-java:$mySQLVersion",
+            "com.jcraft:jsch:$jschVersion",
+            "org.springframework:spring-jdbc:$springVersion",
+            "io.qameta.allure:allure-selenide:$allureVersion",
+            "com.cedarsoft.commons:crypt:$cryptVersion",
+            "org.aeonbits.owner:owner:$ownerVersion",
+            "org.assertj:assertj-core:$assertjCoreVersion",
+            "io.github.bonigarcia:webdrivermanager:$webdrivermanagerVersion",
+            "io.rest-assured:rest-assured:$restAssuredVersion")
+    testRuntimeOnly (
+            "org.slf4j:slf4j-simple:$slf4jVersion")
+}
+
+
+tasks.withType(Test) {
+    systemProperties(System.getProperties())
+    useJUnitPlatform()
+
+    testLogging {
+        lifecycle {
+            events "started", "skipped", "failed", "standard_error", "standard_out"
+            exceptionFormat "short"
+        }
+    }
+}
