@@ -11,8 +11,8 @@ import by.veremei.config.ProjectConfiguration;
 import by.veremei.config.web.WebConfig;
 import by.veremei.api.spec.Specifications;
 import by.veremei.api.users.UserData;
-import by.veremei.data.LoginData;
-import by.veremei.data.RegisterData;
+import by.veremei.api.data.LoginData;
+import by.veremei.api.data.RegisterData;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
 

@@ -1,4 +1,4 @@
-package by.veremei.data;
+package by.veremei.api.data;
 
 public class RegisterData {
     // Response
