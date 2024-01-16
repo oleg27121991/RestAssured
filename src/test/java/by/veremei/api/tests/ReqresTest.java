@@ -18,7 +18,6 @@ import org.junit.jupiter.api.*;
 
 import java.util.List;
 
-import static by.veremei.helpers.CustomApiListener.withCustomTemplates;
 import static com.codeborne.selenide.Configuration.baseUrl;
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
@@ -48,7 +47,6 @@ public class ReqresTest {
     void checkAvatarContainsIdTest() {
         Specifications.installSpecification(Specifications.requestSpec(baseUrl), Specifications.responseSpecOK200());
         Response response = step("Делаем запрос", () -> given()
-                .filter(withCustomTemplates())
                 .when()
                 .get(GET_LIST_USER_URL)
                 .then()
@@ -66,7 +64,6 @@ public class ReqresTest {
         Specifications.installSpecification(Specifications.requestSpec(baseUrl), Specifications.responseSpecOK200());
         Register user = new Register(regData.userEmail, regData.userPass);
         SuccessUserReg successUserReg = step("Делаем запрос", () -> given()
-                .filter(withCustomTemplates())
                 .body(user)
                 .when()
                 .post(POST_USER_REG_URL)
@@ -93,7 +90,6 @@ public class ReqresTest {
         Specifications.installSpecification(Specifications.requestSpec(baseUrl), Specifications.responseSpecError400());
         Register user = new Register(regData.unSuccessUserEmail, regData.emptyUserPass);
         UnSuccessUserReg unSuccessUserReg = step("Делаем запрос", () -> given()
-                .filter(withCustomTemplates())
                 .body(user)
                 .when()
                 .post(POST_USER_REG_URL)
@@ -110,7 +106,6 @@ public class ReqresTest {
     void userNotFoundTest() {
         Specifications.installSpecification(Specifications.requestSpec(baseUrl), Specifications.responseSpecError404());
         Response response = step("Делаем запрос", () -> given()
-                .filter(withCustomTemplates())
                 .when()
                 .get(GET_USER_NOT_FOUND_URL)
                 .then()
@@ -130,7 +125,6 @@ public class ReqresTest {
         Specifications.installSpecification(Specifications.requestSpec(baseUrl), Specifications.responseSpecUnique(204));
         step("Делаем запрос и проверяем, что статус код ответа равен 204", () -> {
             given()
-                    .filter(withCustomTemplates())
                     .when()
                     .delete(DELETE_USER_URL)
                     .then()
@@ -144,7 +138,6 @@ public class ReqresTest {
         Specifications.installSpecification(Specifications.requestSpec(baseUrl), Specifications.responseSpecOK200());
         Login user = new Login(logData.userEmail, logData.userPass);
         SuccessUserLogin successUserLogin = step("Делаем запрос", () -> given()
-                .filter(withCustomTemplates())
                 .body(user)
                 .when()
                 .post(POST_USER_LOGIN_URL)
@@ -165,7 +158,6 @@ public class ReqresTest {
         Specifications.installSpecification(Specifications.requestSpec(baseUrl), Specifications.responseSpecError400());
         Login user = new Login(logData.unSuccessUserEmail, logData.emptyPass);
         UnSuccessUserLogin unSuccessUserLogin = step("Делаем запрос", () -> given()
-                .filter(withCustomTemplates())
                 .body(user)
                 .when()
                 .post(POST_USER_LOGIN_URL)
