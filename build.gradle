@@ -13,7 +13,7 @@ def     slf4jVersion = "2.0.9",
         mySQLVersion = "8.0.33",
         jschVersion = "0.1.55",
         springVersion = "6.1.2",
-        allureVersion = "2.24.0",
+        allureVersion = "2.25.0",
         cryptVersion = "8.9.2",
         ownerVersion = "1.0.12",
         assertjCoreVersion = "3.23.1",
@@ -51,7 +51,8 @@ dependencies {
             "org.aeonbits.owner:owner:$ownerVersion",
             "org.assertj:assertj-core:$assertjCoreVersion",
             "io.github.bonigarcia:webdrivermanager:$webdrivermanagerVersion",
-            "io.rest-assured:rest-assured:$restAssuredVersion")
+            "io.rest-assured:rest-assured:$restAssuredVersion",
+            "io.qameta.allure:allure-rest-assured:$allureVersion")
     testRuntimeOnly (
             "org.slf4j:slf4j-simple:$slf4jVersion")
 }

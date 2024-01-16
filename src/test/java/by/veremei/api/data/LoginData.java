@@ -6,7 +6,7 @@ public class LoginData {
                         userPass = "cityslicka",
                         unSuccessUserEmail = "peter@klaven",
                         emptyPass = "",
-                        unSuccessErrorMessage = "Missing password";;
+                        unSuccessErrorMessage = "Missing password";
     // Response
     public final String userToken = "QpwL5tke4Pnpja7X4";
 }

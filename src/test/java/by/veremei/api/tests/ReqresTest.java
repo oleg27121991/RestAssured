@@ -18,7 +18,9 @@ import org.junit.jupiter.api.*;
 
 import java.util.List;
 
+import static by.veremei.helpers.CustomApiListener.withCustomTemplates;
 import static com.codeborne.selenide.Configuration.baseUrl;
+import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,10 +29,10 @@ public class ReqresTest {
     RegisterData regData = new RegisterData();
     LoginData logData = new LoginData();
     private final static String GET_LIST_USER_URL = "api/users?page=2",
-                                POST_USER_REG_URL = "api/register",
-                                GET_USER_NOT_FOUND_URL = "api/users/23",
-                                DELETE_USER_URL = "api/users/2",
-                                POST_USER_LOGIN_URL = "api/login";
+            POST_USER_REG_URL = "api/register",
+            GET_USER_NOT_FOUND_URL = "api/users/23",
+            DELETE_USER_URL = "api/users/2",
+            POST_USER_LOGIN_URL = "api/login";
 
     @BeforeEach
     public void setup() {
@@ -45,14 +47,17 @@ public class ReqresTest {
     @DisplayName("Аватары содержат id пользователей")
     void checkAvatarContainsIdTest() {
         Specifications.installSpecification(Specifications.requestSpec(baseUrl), Specifications.responseSpecOK200());
-        Response response = given()
+        Response response = step("Делаем запрос", () -> given()
+                .filter(withCustomTemplates())
                 .when()
                 .get(GET_LIST_USER_URL)
                 .then()
                 .log().all()
-                .extract().response();
-        List<UserData> users = response.jsonPath().getList("data", UserData.class);
-        users.forEach(x -> assertTrue(x.getAvatar().contains(x.getId().toString())));
+                .extract().response());
+        step("Проверяем ответ сервера, что аватары содержат id пользователя", () -> {
+            List<UserData> users = response.jsonPath().getList("data", UserData.class);
+            users.forEach(x -> assertTrue(x.avatar().contains(x.id().toString())));
+        });
     }
 
     @Test
@@ -60,17 +65,26 @@ public class ReqresTest {
     void successUserRegTest() {
         Specifications.installSpecification(Specifications.requestSpec(baseUrl), Specifications.responseSpecOK200());
         Register user = new Register(regData.userEmail, regData.userPass);
-        SuccessUserReg successUserReg = given()
+        SuccessUserReg successUserReg = step("Делаем запрос", () -> given()
+                .filter(withCustomTemplates())
                 .body(user)
                 .when()
                 .post(POST_USER_REG_URL)
                 .then()
                 .log().all()
-                .extract().as(SuccessUserReg.class);
-        assertNotNull(successUserReg.getId());
-        assertNotNull(successUserReg.getToken());
-        assertEquals(regData.userId, successUserReg.getId());
-        assertEquals(regData.userToken, successUserReg.getToken());
+                .extract().as(SuccessUserReg.class));
+        step("Проверяем, что id не равно null", () ->
+                assertNotNull(successUserReg.id())
+        );
+        step("Проверяем, что token не равно null", () ->
+                assertNotNull(successUserReg.token())
+        );
+        step("Проверяем id пользователя", () ->
+                assertEquals(regData.userId, successUserReg.id())
+        );
+        step("Проверяем token пользователя", () ->
+                assertEquals(regData.userToken, successUserReg.token())
+        );
     }
 
     @Test
@@ -78,39 +92,50 @@ public class ReqresTest {
     void unSuccessUserRegTest() {
         Specifications.installSpecification(Specifications.requestSpec(baseUrl), Specifications.responseSpecError400());
         Register user = new Register(regData.unSuccessUserEmail, regData.emptyUserPass);
-        UnSuccessUserReg unSuccessUserReg = given()
+        UnSuccessUserReg unSuccessUserReg = step("Делаем запрос", () -> given()
+                .filter(withCustomTemplates())
                 .body(user)
                 .when()
                 .post(POST_USER_REG_URL)
                 .then()
                 .log().all()
-                .extract().as(UnSuccessUserReg.class);
-        assertEquals(regData.unSuccessErrorMessage, unSuccessUserReg.getError());
+                .extract().as(UnSuccessUserReg.class));
+        step("Проверяем наличие сообщения об ошибке", () ->
+                assertEquals(regData.unSuccessErrorMessage, unSuccessUserReg.error())
+        );
     }
 
     @Test
     @DisplayName("Пользователь не найден")
     void userNotFoundTest() {
         Specifications.installSpecification(Specifications.requestSpec(baseUrl), Specifications.responseSpecError404());
-        Response response = given()
+        Response response = step("Делаем запрос", () -> given()
+                .filter(withCustomTemplates())
                 .when()
                 .get(GET_USER_NOT_FOUND_URL)
                 .then()
                 .log().all()
-                .extract().response();
-        assertEquals(404, response.getStatusCode());
-        assertTrue(response.getBody().asString().replaceAll("[^a-zA-Z0-9]", "").isEmpty());
+                .extract().response());
+        step("Проверяем, что статус ошибки равен 404", () ->
+                assertEquals(404, response.getStatusCode())
+        );
+        step("Проверяем, что тело ответа пустое", () ->
+                assertTrue(response.getBody().asString().replaceAll("[^a-zA-Z0-9]", "").isEmpty())
+        );
     }
 
     @Test
     @DisplayName("Удаление пользователя")
     void deleteUserTest() {
         Specifications.installSpecification(Specifications.requestSpec(baseUrl), Specifications.responseSpecUnique(204));
-        given()
-                .when()
-                .delete(DELETE_USER_URL)
-                .then()
-                .log().all();
+        step("Делаем запрос и проверяем, что статус код ответа равен 204", () -> {
+            given()
+                    .filter(withCustomTemplates())
+                    .when()
+                    .delete(DELETE_USER_URL)
+                    .then()
+                    .log().all();
+        });
     }
 
     @Test
@@ -118,15 +143,20 @@ public class ReqresTest {
     void successUserLoginTest() {
         Specifications.installSpecification(Specifications.requestSpec(baseUrl), Specifications.responseSpecOK200());
         Login user = new Login(logData.userEmail, logData.userPass);
-        SuccessUserLogin successUserLogin = given()
+        SuccessUserLogin successUserLogin = step("Делаем запрос", () -> given()
+                .filter(withCustomTemplates())
                 .body(user)
                 .when()
                 .post(POST_USER_LOGIN_URL)
                 .then()
                 .log().all()
-                .extract().as(SuccessUserLogin.class);
-        assertNotNull(successUserLogin.getToken());
-        assertEquals(logData.userToken, successUserLogin.getToken());
+                .extract().as(SuccessUserLogin.class));
+        step("Проверяем, что токен не равен null", () ->
+                assertNotNull(successUserLogin.token())
+        );
+        step("Проверяем token пользователя", () ->
+                assertEquals(logData.userToken, successUserLogin.token())
+        );
     }
 
     @Test
@@ -134,13 +164,16 @@ public class ReqresTest {
     void unSuccessUserLoginTest() {
         Specifications.installSpecification(Specifications.requestSpec(baseUrl), Specifications.responseSpecError400());
         Login user = new Login(logData.unSuccessUserEmail, logData.emptyPass);
-        UnSuccessUserLogin unSuccessUserLogin = given()
+        UnSuccessUserLogin unSuccessUserLogin = step("Делаем запрос", () -> given()
+                .filter(withCustomTemplates())
                 .body(user)
                 .when()
                 .post(POST_USER_LOGIN_URL)
                 .then()
                 .log().all()
-                .extract().as(UnSuccessUserLogin.class);
-        assertEquals(logData.unSuccessErrorMessage, unSuccessUserLogin.getError());
+                .extract().as(UnSuccessUserLogin.class));
+        step("Проверяем наличие сообщения об ошибке", () ->
+                assertEquals(logData.unSuccessErrorMessage, unSuccessUserLogin.error())
+        );
     }
 }
