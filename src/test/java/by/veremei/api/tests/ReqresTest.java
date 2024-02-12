@@ -10,33 +10,35 @@ import by.veremei.api.spec.Specifications;
 import by.veremei.api.models.users.UserData;
 import by.veremei.api.data.LoginData;
 import by.veremei.api.data.RegisterData;
+import by.veremei.pages.UserPage;
+import io.qameta.allure.*;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
 
 import static io.qameta.allure.Allure.step;
+import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("API tests")
-public class ReqresTest {
+@DisplayName("API тесты")
+@Tag("API")
+public class ReqresTest extends BaseTest {
     RegisterData regData = new RegisterData();
     LoginData logData = new LoginData();
-    private final static String BASE_URL = "https://reqres.in/",
-            GET_LIST_USER_URL = "api/users?page=2",
-            POST_USER_REG_URL = "api/register",
-            GET_USER_NOT_FOUND_URL = "api/users/23",
-            DELETE_USER_URL = "api/users/2",
-            POST_USER_LOGIN_URL = "api/login";
 
     @Test
+    @Feature("Управление пользователями")
+    @Story("Список пользователей")
+    @Owner("tg - @Veremeioleg")
+    @Severity(SeverityLevel.BLOCKER)
     @DisplayName("Аватары содержат id пользователей")
     void checkAvatarContainsIdTest() {
-        Specifications.installSpecification(Specifications.requestSpec(BASE_URL), Specifications.responseSpecOK200());
-        Response response = step("Делаем запрос", () -> given()
+        Specifications.installSpecification(Specifications.requestSpec(baseURI), Specifications.responseSpecOK200());
+        Response response = step("Делаем запрос на получение списка пользователей", () -> given()
                 .when()
-                .get(GET_LIST_USER_URL)
+                .get(UserPage.GET_LIST_USER_URL)
                 .then()
                 .log().all()
                 .extract().response());
@@ -47,14 +49,18 @@ public class ReqresTest {
     }
 
     @Test
+    @Feature("Управление пользователями")
+    @Story("Регистрация нового пользователя")
+    @Owner("tg - @Veremeioleg")
+    @Severity(SeverityLevel.CRITICAL)
     @DisplayName("Успешная регистрация пользователя")
     void successUserRegTest() {
-        Specifications.installSpecification(Specifications.requestSpec(BASE_URL), Specifications.responseSpecOK200());
+        Specifications.installSpecification(Specifications.requestSpec(baseURI), Specifications.responseSpecOK200());
         Register user = new Register(regData.userEmail, regData.userPass);
-        SuccessUserReg successUserReg = step("Делаем запрос", () -> given()
+        SuccessUserReg successUserReg = step("Отправляем запрос на регистрацию пользователя", () -> given()
                 .body(user)
                 .when()
-                .post(POST_USER_REG_URL)
+                .post(UserPage.POST_USER_REG_URL)
                 .then()
                 .log().all()
                 .extract().as(SuccessUserReg.class));
@@ -73,14 +79,18 @@ public class ReqresTest {
     }
 
     @Test
+    @Feature("Управление пользователями")
+    @Story("Регистрация нового пользователя")
+    @Owner("tg - @Veremeioleg")
+    @Severity(SeverityLevel.NORMAL)
     @DisplayName("Неуспешная регистрация пользователя")
     void unSuccessUserRegTest() {
-        Specifications.installSpecification(Specifications.requestSpec(BASE_URL), Specifications.responseSpecError400());
+        Specifications.installSpecification(Specifications.requestSpec(baseURI), Specifications.responseSpecError400());
         Register user = new Register(regData.unSuccessUserEmail, regData.emptyUserPass);
-        UnSuccessUserReg unSuccessUserReg = step("Делаем запрос", () -> given()
+        UnSuccessUserReg unSuccessUserReg = step("Отправляем запрос на регистрацию пользователя с некорректными данными", () -> given()
                 .body(user)
                 .when()
-                .post(POST_USER_REG_URL)
+                .post(UserPage.POST_USER_REG_URL)
                 .then()
                 .log().all()
                 .extract().as(UnSuccessUserReg.class));
@@ -90,12 +100,17 @@ public class ReqresTest {
     }
 
     @Test
+    @Feature("Управление пользователями")
+    @Story("Информация о пользователе")
+    @Owner("tg - @Veremeioleg")
+    @Severity(SeverityLevel.MINOR)
     @DisplayName("Пользователь не найден")
     void userNotFoundTest() {
-        Specifications.installSpecification(Specifications.requestSpec(BASE_URL), Specifications.responseSpecError404());
-        Response response = step("Делаем запрос", () -> given()
+        Specifications.installSpecification(Specifications.requestSpec(baseURI), Specifications.responseSpecError404());
+        Response response = step("Делаем запрос на получение информации о несуществующем пользователе", () -> given()
                 .when()
-                .get(GET_USER_NOT_FOUND_URL)
+                .when()
+                .get(UserPage.GET_USER_NOT_FOUND_URL)
                 .then()
                 .log().all()
                 .extract().response());
@@ -108,27 +123,36 @@ public class ReqresTest {
     }
 
     @Test
+    @Feature("Управление пользователями")
+    @Story("Удаление пользователя")
+    @Owner("tg - @Veremeioleg")
+    @Severity(SeverityLevel.NORMAL)
     @DisplayName("Удаление пользователя")
     void deleteUserTest() {
-        Specifications.installSpecification(Specifications.requestSpec(BASE_URL), Specifications.responseSpecUnique(204));
-        step("Делаем запрос и проверяем, что статус код ответа равен 204", () -> {
+        Specifications.installSpecification(Specifications.requestSpec(baseURI), Specifications.responseSpecUnique(204));
+        step("Делаем запрос на удаление пользователя и проверяем, что статус код ответа равен 204", () -> {
             given()
                     .when()
-                    .delete(DELETE_USER_URL)
+                    .delete(UserPage.DELETE_USER_URL)
                     .then()
-                    .log().all();
+                    .log().all()
+                    .statusCode(204);
         });
     }
 
     @Test
+    @Feature("Управление пользователями")
+    @Story("Авторизация пользователя")
+    @Owner("tg - @Veremeioleg")
+    @Severity(SeverityLevel.NORMAL)
     @DisplayName("Успешная авторизация пользователя")
     void successUserLoginTest() {
-        Specifications.installSpecification(Specifications.requestSpec(BASE_URL), Specifications.responseSpecOK200());
+        Specifications.installSpecification(Specifications.requestSpec(baseURI), Specifications.responseSpecOK200());
         Login user = new Login(logData.userEmail, logData.userPass);
-        SuccessUserLogin successUserLogin = step("Делаем запрос", () -> given()
+        SuccessUserLogin successUserLogin = step("Отправляем запрос на авторизацию пользователя с корректными учетными данными", () -> given()
                 .body(user)
                 .when()
-                .post(POST_USER_LOGIN_URL)
+                .post(UserPage.POST_USER_LOGIN_URL)
                 .then()
                 .log().all()
                 .extract().as(SuccessUserLogin.class));
@@ -141,14 +165,18 @@ public class ReqresTest {
     }
 
     @Test
+    @Feature("Управление пользователями")
+    @Story("Авторизация пользователя")
+    @Owner("tg - @Veremeioleg")
+    @Severity(SeverityLevel.MINOR)
     @DisplayName("Неуспешная авторизация пользователя")
     void unSuccessUserLoginTest() {
-        Specifications.installSpecification(Specifications.requestSpec(BASE_URL), Specifications.responseSpecError400());
+        Specifications.installSpecification(Specifications.requestSpec(baseURI), Specifications.responseSpecError400());
         Login user = new Login(logData.unSuccessUserEmail, logData.emptyPass);
-        UnSuccessUserLogin unSuccessUserLogin = step("Делаем запрос", () -> given()
+        UnSuccessUserLogin unSuccessUserLogin = step("Отправляем запрос на авторизацию пользователя с некорректными учетными данными", () -> given()
                 .body(user)
                 .when()
-                .post(POST_USER_LOGIN_URL)
+                .post(UserPage.POST_USER_LOGIN_URL)
                 .then()
                 .log().all()
                 .extract().as(UnSuccessUserLogin.class));
@@ -156,4 +184,6 @@ public class ReqresTest {
                 assertEquals(logData.unSuccessErrorMessage, unSuccessUserLogin.getError())
         );
     }
+
+
 }
